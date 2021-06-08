@@ -5,9 +5,13 @@ from operator import itemgetter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from punctuator import Punctuator
+from google_nlp import analyze_sentiment
 
 glove_embedding_dimensions = 100
 min_user_input_size = 10
+
+sentimet_threshold = 0.5
+emotionality_threshold = 0.5
 
 word_embeddings_file = '/home/tharindu/Desktop/black/codes/Black/Dragon_Project/word_embedding/glove.6B/glove.6B.' + str(glove_embedding_dimensions) + 'd.txt'
 
@@ -36,6 +40,9 @@ def load_word_embeddings():
 			word, coefs = line.split(maxsplit=1)
 			coefs = np.fromstring(coefs, "f", sep=" ")
 			embeddings_dict[word] = coefs
+
+def syntax_analysis(in_text):
+	return in_text
 
 def process_input(in_text):
 	global good_words
@@ -70,10 +77,10 @@ def process_input(in_text):
 	print(processed_in_text)
 	return processed_in_text
 
-def fix_incomplete_sentences(out_text): # not used for now
+def fix_incomplete_sentences(out_text):
 	if(len(re.findall(r'[.]', out_text)) > 0):
 		sections = out_text.split('.')[:-1]
-		return(''.join(sections))
+		return('.'.join(sections))
 	else:
 		return out_text
 
@@ -84,6 +91,40 @@ def correct_basic_mistakes(out_text):
 	out_text = re.sub(" ii ", " I ", out_text)
 	out_text = re.sub(" ive ", " I have ", out_text)
 	return out_text
+
+def not_enough_punctuations(out_text):
+	no_of_dots = len(re.findall(r'[.]', out_text))
+	no_of_commas = len(re.findall(',', out_text))
+	punctuation_count = no_of_dots + no_of_commas
+	character_count = len(out_text)
+	print("punctuation_count: ", punctuation_count)
+	print("character_count: ", character_count)
+	if(punctuation_count > character_count/40):
+		return False
+	else:
+		print("not eoungh punctuations..... adding more punctuations")
+		return True
+
+def care_or_happy(out_text):
+	happiness_metric = len(re.findall('happiness', out_text)) + len(re.findall('happy', out_text)) + len(re.findall('joy', out_text))  + len(re.findall('fun ', out_text)) + len(re.findall('funny ', out_text))  + len(re.findall('fun.', out_text))  + len(re.findall('fun,', out_text))
+	love_metric = len(re.findall('love', out_text)) + len(re.findall('care', out_text)) + len(re.findall('caring', out_text)) + len(re.findall('embrac', out_text)) + len(re.findall('affection', out_text))
+	if(happiness_metric > love_metric):
+		return 'joy'
+	else:
+		return 'protect'
+
+def get_emotion(out_text):
+	sentiment, emotionality = analyze_sentiment(out_text)
+	print("sentiment: ", sentiment)
+	print("emotionality: ", emotionality)
+	if(sentiment > sentimet_threshold and emotionality > emotionality_threshold):
+		emotion = care_or_happy(out_text)
+	elif(sentiment < 0 - sentimet_threshold and emotionality > emotionality_threshold):
+		emotion = 'attack_mode'
+	else:
+		emotion = 'cautious'
+	print("Emotion = ", emotion)
+
 
 model = BartForConditionalGeneration.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
 tokenizer = BartTokenizer.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
@@ -98,18 +139,23 @@ while(True):
 	inputs = tokenizer([ARTICLE_TO_SUMMARIZE], return_tensors='pt')
 
 	# Generate Summary
-	summary_ids = model.generate(inputs['input_ids'], num_beams=4, min_length=15, max_length=150, early_stopping=True)
+	summary_ids = model.generate(inputs['input_ids'], num_beams=4, min_length=15, max_length=100, early_stopping=True)
 	whole_out_text = [tokenizer.decode(g, skip_special_tokens=True, clean_up_tokenization_spaces=False) for g in summary_ids]
 	# print(whole_out_text)
 	raw_out_text = ''.join(whole_out_text)
 	basic_mistakes_fixed = correct_basic_mistakes(raw_out_text)
-	no_incomplete_sentences = fix_incomplete_sentences(basic_mistakes_fixed)
-	punctuations_added = p.punctuate(no_incomplete_sentences)
+	sentece_fragmentation_corrected = fix_incomplete_sentences(basic_mistakes_fixed)
+	
+	if(not_enough_punctuations(sentece_fragmentation_corrected)):
+		final_output = p.punctuate(sentece_fragmentation_corrected)
+	else:
+		final_output = sentece_fragmentation_corrected
 	print("***************************************************************************************************")
 	print(raw_out_text)
 	print(basic_mistakes_fixed)
 	print("***************************************************************************************************")
-	print("Emotional Pavilion: ", punctuations_added)
+	print("Emotional Pavilion: ", final_output)
 	print("***************************************************************************************************")
+	get_emotion(final_output)
 
 	#yesterday was quite hectic. never had a chance to get a good sleep
