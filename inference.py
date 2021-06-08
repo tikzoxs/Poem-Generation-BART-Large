@@ -5,10 +5,13 @@ from operator import itemgetter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from punctuator import Punctuator
-from google_nlp import analyze_sentiment
+from google_nlp import analyze_sentiment, analyze_entities
+
+emotion_dict = {'cautious':0, 'joy':1, 'attack':2, 'protect':3}
 
 glove_embedding_dimensions = 100
 min_user_input_size = 10
+max_user_input_size = 15
 
 sentimet_threshold = 0.5
 emotionality_threshold = 0.5
@@ -19,18 +22,18 @@ word_embeddings_file = '/home/tharindu/Desktop/black/codes/Black/Dragon_Project/
 
 # good_words_old = ['trees', 'love', 'flower', 'house', 'world', 'peace', 'mind', 'hero', 'beaches', 'beach', 'picture', 'victim', 'person', 'happy', 'angry', 'lake', 'grave', 'life', 'death', 'children', 'sweet', 'lane', 'nice', 'sorrow', 'exicted', 'forest', 'road']
 # good_words = ['happy', 'love', 'lane', 'unsure', 'anger', 'angry', 'happiness', 'joy', 'caring', 'care', 'loving']
-good_words = ['i', 'them', 'hang', 'need', 'new', 'above', 'hang', 'floor', 'wait', 'audience', 'out', 'becauase', 'seem', 'meet', 'heart', 'reach',
- 'unrest', 'pause', 'curiuos', 'play', 'people', 'tell', 'hear', 'surprise', 'element', 'keep', 'moemory', 'memories', 'thing', 'different', 'i',
-  'courage', 'there', 'tales', 'many', 'happen', 'i', 'trust', 'unknown', 'situation', 'day', 'put', 'torture', 'i', 
-  'day', 'gone', 'darkness', 'darkness', 'fall', 'children', 'hard', 'i', 'blossom', 'world', 'protect', 'thorn', 'outside', 'harsh', 'spikey','retreat', 
-  'away', 'any', 'garden', 'secret', 'retaliation', 'home', 'attack', 'trigger', 'provication', 'beware', 'my', 'your', 'grow', 'flowers', 'you', 
+good_words = ['them', 'hang', 'need', 'new', 'above', 'hang', 'floor', 'wait', 'audience', 'out', 'becauase', 'seem', 'meet', 'heart', 'reach',
+ 'unrest', 'pause', 'curiuos', 'play', 'people', 'tell', 'hear', 'surprise', 'element', 'keep', 'moemory', 'memories', 'thing', 'different',
+  'courage', 'there', 'tales', 'many', 'happen', 'trust', 'unknown', 'situation', 'day', 'put',
+  'day', 'gone', 'darkness', 'darkness', 'fall', 'children', 'hard', 'blossom', 'world', 'protect', 'thorn', 'outside', 'harsh', 'spikey','retreat', 
+  'away', 'any', 'garden', 'secret', 'retaliation', 'home', 'attack', 'trigger', 'provication', 'beware', 'your', 'grow', 'flowers', 'you', 
   'watch', 'comfort', 'calm', 'embrace', 'words', 'offer', 'wonderful', 'around', 'feels', 'warm', 'roses', 'shelter', 'silk', 'take', 'mighty', 'flow', 
-  'us', 'butterflies', 'soft', 'let', 'heaven', 'shining', 'summer', 'wonder', 'expression', 'flutter', 'their', 'my', 'glittering', 'like', 'full', 
+  'us', 'butterflies', 'soft', 'let', 'heaven', 'shining', 'summer', 'wonder', 'expression', 'flutter', 'their', 'glittering', 'like', 'full', 
   'weightless', 'morning', 'hope', 'jump', 'bubbles', 'energy', 'run', 'tale', 'explore', 'spark', 'dance', 'fly', 'wings', 'filed', 'sparks', 'fileds', 
   'adventure', 'excited', 'rainbow', 'together', 'side', 'endless', 'have', 'along']
 
-emotion_list = [['cautious ', 'peace ', 'neutral '], ['happy ', 'joy ', 'happiness '], 
-['anger ', 'angry ', 'hate ', 'lonely ', 'sad ', 'pain ', 'woe ', 'sorrow ', 'fear '], ['care ', 'love ', 'affection ']]
+emotion_list = [['cautious', 'peace', 'neutral'], ['happy', 'joy', 'happiness'], 
+['anger', 'angry', 'hate', 'lonely', 'sad', 'pain', 'woe', 'sorrow', 'fear'], ['care', 'love', 'affection']]
 embeddings_dict = {}
 
 def load_word_embeddings():
@@ -44,38 +47,36 @@ def load_word_embeddings():
 def syntax_analysis(in_text):
 	return in_text
 
+
 def process_input(in_text):
-	global good_words
-	# print(good_words)
-	# print(len(good_words))
-	in_text = in_text.lower()
-	in_text = re.sub(r'[^a-z\ ]', '', in_text)
-	word_list = in_text.split(' ')
-	stop_words = set(stopwords.words('english') + ['always', 'into', 'can\'t', 'don\'t']) 
-	stop_words_removed = [word + ' ' for word in word_list if not word in stop_words]
-	print(stop_words_removed)
-	in_length = len(stop_words_removed)
-	user_influence_length = min(max(min_user_input_size, in_length//2), in_length)
-	poem_influence_length = user_influence_length // 5
-	index_list = random.sample(range(max(in_length, 1)), user_influence_length)
-	good_index_list = random.sample(range(len(good_words)), poem_influence_length)
-	if(in_length>4):
-		selected_words = list(itemgetter(*index_list)(stop_words_removed))
+	total_length = len(in_text)
+	entity_words = list(analyze_entities(in_text))
+	print(entity_words)
+	entity_count = len(entity_words)
+	if(entity_count > max_user_input_size):
+		random.shuffle(entity_words)
+		final_words = entity_words[0:max_user_input_size]
 	else:
-		selected_words = []
+		final_words = entity_words
+	poem_influence_length = random.randint(1,4)
+	good_index_list = random.sample(range(len(good_words)), poem_influence_length)
 	good_words_list = list(itemgetter(*good_index_list)(good_words))
-	# print(good_words_list)
-	selected_good_words = [word + ' ' for word in good_words_list]
-	# print(selected_words)
-	# print(selected_good_words)
-	all_selected_words = selected_words + selected_good_words
-	emotion = random.randint(0,3)
+	print(good_words_list)
+	final_words = final_words + good_words_list
+	emotional_relevance = random.randint(0,1)
+	if(emotional_relevance == 1):
+		print("----------------Emotionally Relevant---------------------")
+		emotion = emotion_dict[get_emotion(in_text)]
+	else:
+		emotion = random.randint(0,3)
 	emotional_words = emotion_list[emotion]
-	all_selected_words.append(emotional_words[random.randint(0,len(emotional_words)-1)])
-	random.shuffle(all_selected_words)
-	processed_in_text = ''.join(all_selected_words)
+	print(emotional_words)
+	final_words.append(emotional_words[random.randint(0,len(emotional_words)-1)])
+	random.shuffle(final_words)
+	processed_in_text = ' '.join(final_words)
 	print(processed_in_text)
 	return processed_in_text
+
 
 def fix_incomplete_sentences(out_text):
 	if(len(re.findall(r'[.]', out_text)) > 0):
@@ -113,17 +114,18 @@ def care_or_happy(out_text):
 	else:
 		return 'protect'
 
-def get_emotion(out_text):
-	sentiment, emotionality = analyze_sentiment(out_text)
+def get_emotion(text):
+	sentiment, emotionality = analyze_sentiment(text)
 	print("sentiment: ", sentiment)
 	print("emotionality: ", emotionality)
 	if(sentiment > sentimet_threshold and emotionality > emotionality_threshold):
-		emotion = care_or_happy(out_text)
+		emotion = care_or_happy(text)
 	elif(sentiment < 0 - sentimet_threshold and emotionality > emotionality_threshold):
-		emotion = 'attack_mode'
+		emotion = 'attack'
 	else:
 		emotion = 'cautious'
 	print("Emotion = ", emotion)
+	return emotion
 
 
 model = BartForConditionalGeneration.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
@@ -159,3 +161,47 @@ while(True):
 	get_emotion(final_output)
 
 	#yesterday was quite hectic. never had a chance to get a good sleep
+
+
+
+
+
+
+
+
+
+
+
+
+# def process_input(in_text):
+# 	global good_words
+# 	# print(good_words)
+# 	# print(len(good_words))
+# 	in_text = in_text.lower()
+# 	in_text = re.sub(r'[^a-z\ ]', '', in_text)
+# 	word_list = in_text.split(' ')
+# 	stop_words = set(stopwords.words('english') + ['always', 'into', 'can\'t', 'don\'t']) 
+# 	stop_words_removed = [word + ' ' for word in word_list if not word in stop_words]
+# 	print(stop_words_removed)
+# 	in_length = len(stop_words_removed)
+# 	user_influence_length = min(max(min_user_input_size, in_length//2), in_length)
+# 	poem_influence_length = user_influence_length // 5
+# 	index_list = random.sample(range(max(in_length, 1)), user_influence_length)
+# 	good_index_list = random.sample(range(len(good_words)), poem_influence_length)
+# 	if(in_length>4):
+# 		selected_words = list(itemgetter(*index_list)(stop_words_removed))
+# 	else:
+# 		selected_words = []
+# 	good_words_list = list(itemgetter(*good_index_list)(good_words))
+# 	# print(good_words_list)
+# 	selected_good_words = [word + ' ' for word in good_words_list]
+# 	# print(selected_words)
+# 	# print(selected_good_words)
+# 	all_selected_words = selected_words + selected_good_words
+# 	emotion = random.randint(0,3)
+# 	emotional_words = emotion_list[emotion]
+# 	all_selected_words.append(emotional_words[random.randint(0,len(emotional_words)-1)])
+# 	random.shuffle(all_selected_words)
+# 	processed_in_text = ''.join(all_selected_words)
+# 	print(processed_in_text)
+# 	return processed_in_text
