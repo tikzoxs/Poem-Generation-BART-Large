@@ -6,21 +6,19 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from punctuator import Punctuator
 from google_nlp import analyze_sentiment, analyze_entities, analyze_syntax
+from questions import get_question_ids, create_question
 
 emotion_dict = {'cautious':0, 'joy':1, 'attack':2, 'protect':3}
 
 glove_embedding_dimensions = 100
 min_user_input_size = 10
 max_user_input_size = 15
-
 sentimet_threshold = 0.3
 emotionality_threshold = 0.5
+character_punctuation_ratio = 40
 
 word_embeddings_file = '/home/tharindu/Desktop/black/codes/Black/Dragon_Project/word_embedding/glove.6B/glove.6B.' + str(glove_embedding_dimensions) + 'd.txt'
-
 input_entities  = []
-
-
 
 # good_words_old = ['trees', 'love', 'flower', 'house', 'world', 'peace', 'mind', 'hero', 'beaches', 'beach', 'picture', 'victim', 'person', 'happy', 'angry', 'lake', 'grave', 'life', 'death', 'children', 'sweet', 'lane', 'nice', 'sorrow', 'exicted', 'forest', 'road']
 # good_words = ['happy', 'love', 'lane', 'unsure', 'anger', 'angry', 'happiness', 'joy', 'caring', 'care', 'loving']
@@ -38,6 +36,8 @@ emotion_list = [['cautious', 'peace', 'neutral'], ['happy', 'joy', 'happiness'],
 ['anger', 'angry', 'hate', 'lonely', 'sad', 'pain', 'woe', 'sorrow', 'fear'], ['care', 'love', 'affection']]
 embeddings_dict = {}
 
+sentiments_list = ['POSITIVE', 'NEGATIVE', 'NEUTRAL']
+numbers_list = ['SINULAR', 'PLURAL', 'BACKUP', 'GENERAL']
 
 def load_word_embeddings():
 	global embeddings_dict
@@ -66,18 +66,30 @@ def syntax_analysis(text):
 		return good_candidate_words_for_question
 	elif(len(okay_noun_candidate_words_for_question) > 0):
 		return okay_noun_candidate_words_for_question
-	elif(len(okay_verb_candidate_words_for_question) > 0):
-		return okay_verb_candidate_words_for_question
+	# elif(len(okay_verb_candidate_words_for_question) > 0): #VERB questions are not yet implemented
+	# 	return okay_verb_candidate_words_for_question
 	else:
 		return []
 
+def create_question_stack():
+	question_id_counts = get_question_ids(numbers_list ,sentiments_list)
+	question_idx = [[],[],[],[]]
+	for n in range(0,4):
+		big_temp_list = []
+		for s in range(0,3):
+			temp_list = []
+			for x in range(0,question_id_counts[n][s]):
+				temp_list.append(1)
+			big_temp_list.append(temp_list)
+		question_idx[n].append(big_temp_list)
+	return question_idx
+
 def generate_question(candidates):
 	if(len(candidates) > 0):
+		random.shuffle(candidates)
 		question, number = candidates[0]
-		
+
 	else:
-
-
 
 def process_input(in_text):
 	global input_entities
@@ -110,7 +122,6 @@ def process_input(in_text):
 	print(processed_in_text)
 	return processed_in_text
 
-
 def fix_incomplete_sentences(out_text):
 	if(len(re.findall(r'[.]', out_text)) > 0):
 		sections = out_text.split('.')[:-1]
@@ -133,7 +144,7 @@ def not_enough_punctuations(out_text):
 	character_count = len(out_text)
 	print("punctuation_count: ", punctuation_count)
 	print("character_count: ", character_count)
-	if(punctuation_count > character_count/40):
+	if(punctuation_count > character_count/character_punctuation_ratio):
 		return False
 	else:
 		print("not eoungh punctuations..... adding more punctuations")
@@ -165,6 +176,9 @@ model = BartForConditionalGeneration.from_pretrained('/home/tharindu/Desktop/bla
 tokenizer = BartTokenizer.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
 p = Punctuator('Demo-Europarl-EN.pcl')
 
+question_stack = create_question_stack()
+temp_question_stack = question_stack.copy()
+
 while(True):
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 	in_text = input("Tell Something: ")
@@ -194,47 +208,3 @@ while(True):
 	get_emotion(final_output)
 
 	#yesterday was quite hectic. never had a chance to get a good sleep
-
-
-
-
-
-
-
-
-
-
-
-
-# def process_input(in_text):
-# 	global good_words
-# 	# print(good_words)
-# 	# print(len(good_words))
-# 	in_text = in_text.lower()
-# 	in_text = re.sub(r'[^a-z\ ]', '', in_text)
-# 	word_list = in_text.split(' ')
-# 	stop_words = set(stopwords.words('english') + ['always', 'into', 'can\'t', 'don\'t']) 
-# 	stop_words_removed = [word + ' ' for word in word_list if not word in stop_words]
-# 	print(stop_words_removed)
-# 	in_length = len(stop_words_removed)
-# 	user_influence_length = min(max(min_user_input_size, in_length//2), in_length)
-# 	poem_influence_length = user_influence_length // 5
-# 	index_list = random.sample(range(max(in_length, 1)), user_influence_length)
-# 	good_index_list = random.sample(range(len(good_words)), poem_influence_length)
-# 	if(in_length>4):
-# 		selected_words = list(itemgetter(*index_list)(stop_words_removed))
-# 	else:
-# 		selected_words = []
-# 	good_words_list = list(itemgetter(*good_index_list)(good_words))
-# 	# print(good_words_list)
-# 	selected_good_words = [word + ' ' for word in good_words_list]
-# 	# print(selected_words)
-# 	# print(selected_good_words)
-# 	all_selected_words = selected_words + selected_good_words
-# 	emotion = random.randint(0,3)
-# 	emotional_words = emotion_list[emotion]
-# 	all_selected_words.append(emotional_words[random.randint(0,len(emotional_words)-1)])
-# 	random.shuffle(all_selected_words)
-# 	processed_in_text = ''.join(all_selected_words)
-# 	print(processed_in_text)
-# 	return processed_in_text
