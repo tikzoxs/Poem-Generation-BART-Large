@@ -5,7 +5,7 @@ from operator import itemgetter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from punctuator import Punctuator
-from google_nlp import analyze_sentiment, analyze_entities
+from google_nlp import analyze_sentiment, analyze_entities, analyze_syntax
 
 emotion_dict = {'cautious':0, 'joy':1, 'attack':2, 'protect':3}
 
@@ -13,10 +13,12 @@ glove_embedding_dimensions = 100
 min_user_input_size = 10
 max_user_input_size = 15
 
-sentimet_threshold = 0.5
+sentimet_threshold = 0.3
 emotionality_threshold = 0.5
 
 word_embeddings_file = '/home/tharindu/Desktop/black/codes/Black/Dragon_Project/word_embedding/glove.6B/glove.6B.' + str(glove_embedding_dimensions) + 'd.txt'
+
+input_entities  = []
 
 
 
@@ -44,13 +46,36 @@ def load_word_embeddings():
 			coefs = np.fromstring(coefs, "f", sep=" ")
 			embeddings_dict[word] = coefs
 
-def syntax_analysis(in_text):
-	return in_text
+def syntax_analysis(text):
+	global input_entities
+	good_candidate_words_for_question = []
+	okay_noun_candidate_words_for_question = []
+	okay_verb_candidate_words_for_question = []
+	words, word_types, numbers = analyze_syntax(text)
+	for word, word_type, number in zip(words, word_types, numbers):
+		if(word in input_entities):
+			if(word_type is 'NOUN'):
+				good_candidate_words_for_question.append((word,number))
+		else:
+			if(word_type is 'NOUN'):
+				okay_noun_candidate_words_for_question.append((word,number))
+			elif(word_type is 'VERB'):
+				okay_verb_candidate_words_for_question.append((word,number))
+	if(len(good_candidate_words_for_question) > 0):
+		return good_candidate_words_for_question
+	elif(len(okay_noun_candidate_words_for_question) > 0):
+		return okay_noun_candidate_words_for_question
+	elif(len(okay_verb_candidate_words_for_question) > 0):
+		return okay_verb_candidate_words_for_question
+	else:
+		return []      
 
 
 def process_input(in_text):
+	global input_entities
 	total_length = len(in_text)
 	entity_words = list(analyze_entities(in_text))
+	input_entities = entity_words.copy()
 	print(entity_words)
 	entity_count = len(entity_words)
 	if(entity_count > max_user_input_size):
