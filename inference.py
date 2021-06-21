@@ -38,6 +38,7 @@ emotion_list = [['cautious', 'peace', 'neutral'], ['happy', 'joy', 'happiness'],
 ['anger', 'angry', 'hate', 'lonely', 'sad', 'pain', 'woe', 'sorrow', 'fear'], ['care', 'love', 'affection']]
 embeddings_dict = {}
 
+
 def load_word_embeddings():
 	global embeddings_dict
 	with open(word_embeddings_file) as f:
@@ -68,7 +69,14 @@ def syntax_analysis(text):
 	elif(len(okay_verb_candidate_words_for_question) > 0):
 		return okay_verb_candidate_words_for_question
 	else:
-		return []      
+		return []
+
+def generate_question(candidates):
+	if(len(candidates) > 0):
+		question, number = candidates[0]
+		
+	else:
+
 
 
 def process_input(in_text):
