@@ -7,6 +7,7 @@ from nltk.tokenize import word_tokenize
 from punctuator import Punctuator
 from google_nlp import analyze_sentiment, analyze_entities, analyze_syntax
 from questions import get_question_ids, create_question
+import t2s
 
 emotion_dict = {'cautious':0, 'joy':1, 'attack':2, 'protect':3}
 
@@ -55,12 +56,12 @@ def syntax_analysis(text):
 	words, word_types, numbers = analyze_syntax(text)
 	for word, word_type, number in zip(words, word_types, numbers):
 		if(word in input_entities):
-			if(word_type is 'NOUN'):
+			if(word_type == 'NOUN'):
 				good_candidate_words_for_question.append((word,number))
 		else:
-			if(word_type is 'NOUN'):
+			if(word_type == 'NOUN'):
 				okay_noun_candidate_words_for_question.append((word,number))
-			elif(word_type is 'VERB'):
+			elif(word_type == 'VERB'):
 				okay_verb_candidate_words_for_question.append((word,number))
 	if(len(good_candidate_words_for_question) > 0):
 		return good_candidate_words_for_question
@@ -84,12 +85,25 @@ def create_question_stack():
 		question_idx[n].append(big_temp_list)
 	return question_idx
 
-def generate_question(candidates):
+def generate_question(candidates, emotion):
+	print(candidates)
 	if(len(candidates) > 0):
 		random.shuffle(candidates)
-		question, number = candidates[0]
-
+		word, number = candidates[0]
 	else:
+		word = ''
+		number = None
+
+	if(emotion == 'joy' or emotion == 'protect'):
+		sentiment = 'POSITIVE'
+	elif(emotion == 'attack'):
+		sentiment =  'NEGATIVE'
+	else:
+		sentiment = 'NEUTRAL'
+
+	question_id = -1
+	question  = create_question(number, sentiment, question_id, word=word)
+	return question
 
 def process_input(in_text):
 	global input_entities
@@ -103,8 +117,10 @@ def process_input(in_text):
 		final_words = entity_words[0:max_user_input_size]
 	else:
 		final_words = entity_words
-	poem_influence_length = random.randint(1,4)
+	poem_influence_length = random.randint(2,4)
+	print('poem_influence_length = ', poem_influence_length)
 	good_index_list = random.sample(range(len(good_words)), poem_influence_length)
+	print('good_index_list = ', good_index_list)
 	good_words_list = list(itemgetter(*good_index_list)(good_words))
 	print(good_words_list)
 	final_words = final_words + good_words_list
@@ -160,15 +176,15 @@ def care_or_happy(out_text):
 
 def get_emotion(text):
 	sentiment, emotionality = analyze_sentiment(text)
-	print("sentiment: ", sentiment)
-	print("emotionality: ", emotionality)
+	# print("sentiment: ", sentiment)
+	# print("emotionality: ", emotionality)
 	if(sentiment > sentimet_threshold and emotionality > emotionality_threshold):
 		emotion = care_or_happy(text)
 	elif(sentiment < 0 - sentimet_threshold and emotionality > emotionality_threshold):
 		emotion = 'attack'
 	else:
 		emotion = 'cautious'
-	print("Emotion = ", emotion)
+	# print("Emotion = ", emotion)
 	return emotion
 
 
@@ -179,6 +195,8 @@ p = Punctuator('Demo-Europarl-EN.pcl')
 question_stack = create_question_stack()
 temp_question_stack = question_stack.copy()
 
+######################## start coding from here - 22nd June ###################
+
 while(True):
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 	in_text = input("Tell Something: ")
@@ -188,7 +206,7 @@ while(True):
 	inputs = tokenizer([ARTICLE_TO_SUMMARIZE], return_tensors='pt')
 
 	# Generate Summary
-	summary_ids = model.generate(inputs['input_ids'], num_beams=4, min_length=15, max_length=100, early_stopping=True)
+	summary_ids = model.generate(inputs['input_ids'], num_beams=4, min_length=15, max_length=1520, early_stopping=True)
 	whole_out_text = [tokenizer.decode(g, skip_special_tokens=True, clean_up_tokenization_spaces=False) for g in summary_ids]
 	# print(whole_out_text)
 	raw_out_text = ''.join(whole_out_text)
@@ -199,12 +217,23 @@ while(True):
 		final_output = p.punctuate(sentece_fragmentation_corrected)
 	else:
 		final_output = sentece_fragmentation_corrected
-	print("***************************************************************************************************")
-	print(raw_out_text)
-	print(basic_mistakes_fixed)
+	# print("***************************************************************************************************")
+	# print(raw_out_text)
+	# print(basic_mistakes_fixed)
+	final_output = final_output + '. '
+	pavilion_emotion = get_emotion(final_output)
+
+	candidates = syntax_analysis(in_text)
+	question = generate_question(candidates,pavilion_emotion)
+	print("\n\n***************************************************************************************************")
+	print("Person: ", in_text)
 	print("***************************************************************************************************")
 	print("Emotional Pavilion: ", final_output)
+	print(question)
 	print("***************************************************************************************************")
-	get_emotion(final_output)
+	print('Emotion =  ', pavilion_emotion)
 
+	t2s.text_to_voice(final_output, question, pavilion_emotion)
+
+	
 	#yesterday was quite hectic. never had a chance to get a good sleep
