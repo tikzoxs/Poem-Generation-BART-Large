@@ -2,8 +2,9 @@ import random
 
 question_dict = {
 'neutral_general_questions': [	("What do you think about ", "?"),
-								("What do you feel about ", "?"),
-								("You mentioned ", " what does it really mean? I don't fully understand.")],
+								("How do you feel about ", "?"),
+								("You mentioned ", " what does it really mean? I don't fully understand."),
+								("What do you define ", "?")],
 
 'positive_general_questions': [	("What do you think about ", "? I am a big fan."),
 								("I find ", " to be interesting. What do you think?"),

@@ -33,7 +33,7 @@ good_words = ['them', 'hang', 'need', 'new', 'above', 'hang', 'floor', 'wait', '
   'weightless', 'morning', 'hope', 'jump', 'bubbles', 'energy', 'run', 'tale', 'explore', 'spark', 'dance', 'fly', 'wings', 'filed', 'sparks', 'fileds', 
   'adventure', 'excited', 'rainbow', 'together', 'side', 'endless', 'have', 'along']
 
-emotion_list = [['cautious', 'peace', 'neutral'], ['happy', 'joy', 'happiness'], 
+emotion_list = [['cautious', 'peace', 'neutral', 'calm', ], ['happy', 'joy', 'happiness', 'over the moon'], 
 ['anger', 'angry', 'hate', 'lonely', 'sad', 'pain', 'woe', 'sorrow', 'fear'], ['care', 'love', 'affection']]
 embeddings_dict = {}
 
