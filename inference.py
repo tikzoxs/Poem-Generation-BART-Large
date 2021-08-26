@@ -8,6 +8,7 @@ from punctuator import Punctuator
 from google_nlp import analyze_sentiment, analyze_entities, analyze_syntax
 from questions import get_question_ids, create_question
 import t2s
+from record_audio import record_and_transcribe
 
 emotion_dict = {'cautious':0, 'joy':1, 'attack':2, 'protect':3}
 
@@ -17,8 +18,9 @@ max_user_input_size = 15
 sentimet_threshold = 0.3
 emotionality_threshold = 0.5
 character_punctuation_ratio = 40
+time_to_speak = 15
 
-word_embeddings_file = '/home/tharindu/Desktop/black/codes/Black/Dragon_Project/word_embedding/glove.6B/glove.6B.' + str(glove_embedding_dimensions) + 'd.txt'
+# word_embeddings_file = '/home/tharindu/Desktop/black/codes/Black/Dragon_Project/word_embedding/glove.6B/glove.6B.' + str(glove_embedding_dimensions) + 'd.txt'
 input_entities  = []
 
 # good_words_old = ['trees', 'love', 'flower', 'house', 'world', 'peace', 'mind', 'hero', 'beaches', 'beach', 'picture', 'victim', 'person', 'happy', 'angry', 'lake', 'grave', 'life', 'death', 'children', 'sweet', 'lane', 'nice', 'sorrow', 'exicted', 'forest', 'road']
@@ -40,13 +42,16 @@ embeddings_dict = {}
 sentiments_list = ['POSITIVE', 'NEGATIVE', 'NEUTRAL']
 numbers_list = ['SINULAR', 'PLURAL', 'BACKUP', 'GENERAL']
 
-def load_word_embeddings():
-	global embeddings_dict
-	with open(word_embeddings_file) as f:
-		for line in f:
-			word, coefs = line.split(maxsplit=1)
-			coefs = np.fromstring(coefs, "f", sep=" ")
-			embeddings_dict[word] = coefs
+prompt_list = ["Did you say something? I didn't hear", "I don't like this silence, is someone there?", "I'm in darkness, am I deaf?, Hey, you."]
+instruction_list = ["Please speak up.", "tell me something.", "talk louder", "speak your heart out", "tell a story", "speak louder"]
+
+# def load_word_embeddings():
+# 	global embeddings_dict
+# 	with open(word_embeddings_file) as f:
+# 		for line in f:
+# 			word, coefs = line.split(maxsplit=1)
+# 			coefs = np.fromstring(coefs, "f", sep=" ")
+# 			embeddings_dict[word] = coefs
 
 def syntax_analysis(text):
 	global input_entities
@@ -187,6 +192,31 @@ def get_emotion(text):
 	# print("Emotion = ", emotion)
 	return emotion
 
+def get_input_text():
+	silence_count = 0
+	in_text = record_and_transcribe(time_to_speak)
+	if('deep learning' in in_text):
+		return 'exit program'
+	while(len(in_text) < 10):
+		silence_count += 1
+		if(silence_count<3):
+			prompt = prompt_list[random.randint(0, len(prompt_list)-1)]
+			instruction = instruction_list[random.randint(0, len(instruction_list)-1)]
+			pavilion_emotion = 'cautious'
+			t2s.text_to_voice(prompt, instruction, pavilion_emotion)
+			in_text = record_and_transcribe(time_to_speak)
+			if('deep learning' in in_text):
+				return 'exit program'
+		elif(silence_count>20):
+			silence_count = 0
+			in_text = record_and_transcribe(time_to_speak)
+			if('deep learning' in in_text):
+				return 'exit program'
+		else:
+			in_text = record_and_transcribe(time_to_speak)
+			if('deep learning' in in_text):
+				return 'exit program'
+	return in_text
 
 model = BartForConditionalGeneration.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
 tokenizer = BartTokenizer.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
@@ -198,9 +228,10 @@ temp_question_stack = question_stack.copy()
 ######################## start coding from here - 22nd June ###################
 
 while(True):
-	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-	in_text = input("Tell Something: ")
-	if(in_text == 'q'):
+	print("\n\n*****************************************************\n\n")
+	
+	in_text = get_input_text()
+	if(in_text == 'exit program'):
 		break
 	ARTICLE_TO_SUMMARIZE = process_input(in_text)
 	inputs = tokenizer([ARTICLE_TO_SUMMARIZE], return_tensors='pt')

@@ -3,18 +3,18 @@ import random
 question_dict = {
 'neutral_general_questions': [	("What do you think about ", "?"),
 								("How do you feel about ", "?"),
-								("You mentioned ", " what does it really mean? I don't fully understand."),
+								("You mentioned ", ". what does it really mean? I don't fully understand."),
 								("What do you define ", "?")],
 
 'positive_general_questions': [	("What do you think about ", "? I am a big fan."),
 								("I find ", " to be interesting. What do you think?"),
-								("I love ", " how about you? I want to hear."),
-								("I like to talk about ", " Let's talk. What are your opinions?")],
+								("I love ", ", how about you? I want to hear."),
+								("I like to talk about ", ". Let's talk. What are your opinions?")],
 
 'negative_general_questions': [	("What do you think about ", "? I do not like at all."),
 								("I find ", " to be boring. Do you not think?"),
-								("I'm sad about ", " what are your feelings?"),
-								("I do not like to talk about ", " Let's talk about something else. Summarize your life.")],
+								("I'm sad about ", ". What are your feelings?"),
+								("I do not like to talk about ", ". Let's talk about something else. Summarize your life.")],
 
 'neutral_singular_questions': [	("", " is something new to me. Tell me more, what are your thougts?"),
 								("", " triggers something i can't verbalize. Explain it to me.")],
@@ -26,23 +26,28 @@ question_dict = {
 								("", " has a nice sound to it. Explain it to me.")],
 
 'positive_plural_questions': [	("", " are interesting. Tell me more, what are your thougts?"),
-								("I love ", " how about you? I want to hear.")],
+								("I love ", ", how about you? I want to hear.")],
 
-'negative_singular_questions': [("I'm sad about ", " what are your feelings?"),
+'negative_singular_questions': [("I'm sad about ", ". What are your feelings?"),
 								("I do not think that ", " is good. Tell me more, what are your thougts?")],
 
-'negative_plural_questions': [	("I'm sad about ", " what are your feelings?"),
+'negative_plural_questions': [	("I'm sad about ", ". What are your feelings?"),
 								("I do not think that ", " are good. Tell me more, what are your thougts?")],
 
 'neutral_backup_questions': [	("What do to think, about the world, in 20 years? what will be different", "?"),
 							  	("Forget it. Tell me a story. Anything that comes to your mind", "."),
-							  	("Can you describe your thougts? What are you thinking right now", "?")],
+							  	("Can you describe your thougts? What are you thinking right now", "?"),
+							  	("Sometimes I let myself flow with the world. Do you go with the flow? why", "?")],
 
 'positive_backup_questions': [	("Love takes different forms, as I think, What are the forms of love, you have experienced", "?"),
-							  	("Sounds like you have had a good day. Tell me more", ".")],
+							  	("Sounds like you have had a good day. Tell me more", "."),
+							  	("Life is marvelous. That is my opinion though. What is yours", "?"),
+							  	("I love music. For me, every sound is a music. How do you experience music", "?")],
 
 'negative_backup_questions': [	("Humans are destroying the world. Don't you agree?, why", "?"),
-							  	("Sounds like you have had a bad day. Tell me more", ".")]
+							  	("Sounds like you have had a bad day. Tell me more", "."),
+							  	("Sad thoughts cross everyone's mind. How do you deal with sad thoughts", "?"),
+							  	("Sometimes I get angry. How will you behave then", "?")]
 }
 
 def get_question_ids(numbers, sentiments):
