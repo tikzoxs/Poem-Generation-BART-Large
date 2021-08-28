@@ -190,5 +190,5 @@ def analyze_entities(text_content):
 
 
 # print(analyze_sentiment("Let us watch the flowers grow. The soft leaves will shelter and comfort you. Watch the butterflies around you."))
-print(analyze_syntax("I experience a significant part of world through my ears. I love listening to the different sounds in the environment, be it traffic or the birds. In my opinion there is so much to listen to in this world that tells us a lot about it."))
-print(analyze_entities("I experience a significant part of world through my ears. I love listening to the different sounds in the environment, be it traffic or the birds. In my opinion there is so much to listen to in this world that tells us a lot about it."))
+# print(analyze_syntax("I experience a significant part of world through my ears. I love listening to the different sounds in the environment, be it traffic or the birds. In my opinion there is so much to listen to in this world that tells us a lot about it."))
+# print(analyze_entities("I experience a significant part of world through my ears. I love listening to the different sounds in the environment, be it traffic or the birds. In my opinion there is so much to listen to in this world that tells us a lot about it."))
