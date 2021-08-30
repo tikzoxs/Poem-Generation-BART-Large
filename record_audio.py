@@ -1,9 +1,11 @@
 import pyaudio
 import wave
 import s2t
+from communication import comm
 
 def record_and_transcribe(time_s):
 	# the file name output you want to record into
+	# comm("recrding")
 	filename = "recordings/recorded.wav"
 	# set the chunk size of 1024 samples
 	chunk = 1024
@@ -49,5 +51,6 @@ def record_and_transcribe(time_s):
 	wf.writeframes(b"".join(frames))
 	# close the file
 	wf.close()
+	# comm("processing")
 
 	return s2t.transcribe_file(filename)

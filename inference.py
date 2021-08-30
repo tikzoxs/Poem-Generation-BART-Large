@@ -255,7 +255,7 @@ while(True):
 	final_output = final_output + '. '
 	pavilion_emotion = get_emotion(final_output)
 	# send_messege(bytes(pavilion_emotion, 'utf-8')) 
-	comm(pavilion_emotion)
+	# comm(pavilion_emotion)
 
 	candidates = syntax_analysis(in_text)
 	question = generate_question(candidates,pavilion_emotion)
