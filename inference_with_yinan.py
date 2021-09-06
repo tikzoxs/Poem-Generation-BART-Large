@@ -9,7 +9,7 @@ from google_nlp import analyze_sentiment, analyze_entities, analyze_syntax
 from questions import get_question_ids, create_question
 import t2s
 from record_audio import record_and_transcribe
-from communication import comm, get_response
+from communication import comm, receive_sentence
 
 emotion_dict = {'cautious':0, 'joy':1, 'attack':2, 'protect':3}
 
@@ -195,7 +195,9 @@ def get_emotion(text):
 
 def get_input_text():
 	silence_count = 0
-	in_text = record_and_transcribe(time_to_speak)
+	print("getting the recorded sentence.....")
+	in_text = receive_sentence()
+	print("in_text = ", in_text)
 	if('deep learning' in in_text):
 		return 'exit program'
 	while(len(in_text) < 10):
@@ -204,17 +206,19 @@ def get_input_text():
 			prompt = prompt_list[random.randint(0, len(prompt_list)-1)]
 			instruction = instruction_list[random.randint(0, len(instruction_list)-1)]
 			pavilion_emotion = 'idle'
-			t2s.text_to_voice(prompt, instruction, pavilion_emotion)
-			in_text = record_and_transcribe(time_to_speak)
+			command = 'speak'
+			messege = command + '@' + prompt + '_' + instruction + '_' + pavilion_emotion
+			comm(messege)
+			in_text = receive_sentence()
 			if('deep learning' in in_text):
 				return 'exit program'
 		elif(silence_count>20):
 			silence_count = 0
-			in_text = record_and_transcribe(time_to_speak)
+			in_text = receive_sentence()
 			if('deep learning' in in_text):
 				return 'exit program'
 		else:
-			in_text = record_and_transcribe(time_to_speak)
+			in_text = receive_sentence()
 			if('deep learning' in in_text):
 				return 'exit program'
 	return in_text
@@ -238,7 +242,7 @@ while(True):
 	inputs = tokenizer([ARTICLE_TO_SUMMARIZE], return_tensors='pt')
 
 	# Generate Summary
-	summary_ids = model.generate(inputs['input_ids'], num_beams=4, min_length=15, max_length=50, early_stopping=True)
+	summary_ids = model.generate(inputs['input_ids'], num_beams=4, min_length=30, max_length=70, early_stopping=True)
 	whole_out_text = [tokenizer.decode(g, skip_special_tokens=True, clean_up_tokenization_spaces=False) for g in summary_ids]
 	# print(whole_out_text)
 	raw_out_text = ''.join(whole_out_text)
@@ -267,7 +271,9 @@ while(True):
 	print("***************************************************************************************************")
 	print('Emotion =  ', pavilion_emotion)
 
-	t2s.text_to_voice(final_output, question, pavilion_emotion)
-
+	# t2s.text_to_voice(final_output, question, pavilion_emotion)
+	command = 'speak'
+	messege = command + '@' + final_output + '_' + question + '_' + pavilion_emotion
+	comm(messege)
 	
 	#yesterday was quite hectic. never had a chance to get a good sleep
