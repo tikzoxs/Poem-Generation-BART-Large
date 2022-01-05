@@ -2,7 +2,7 @@ Requiremets are to be installed on top of official NVIDIA Tensorflow Docker Imag
 	- Cuda nn dependencies
 	- Tensorflow 
 
-#if installing on top of official Tf NVIDIA docker, the following are the requirements
+#if installing on top of official Tf NVIDIA docker, the following are the requirements (https://www.tensorflow.org/install/docker)
 
 #Google cloud APIs. 
 pip install --upgrade google-cloud-language
