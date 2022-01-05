@@ -1,0 +1,37 @@
+Requiremets are to be installed on top of official NVIDIA Tensorflow Docker Image. Otherwise, the following have to be installed which is a hard task
+	- Cuda nn dependencies
+	- Tensorflow 
+
+#if installing on top of official Tf NVIDIA docker, the following are the requirements
+
+#Google cloud APIs. 
+pip install --upgrade google-cloud-language
+pip install --upgrade google-cloud-speech
+pip install --upgrade google-cloud-texttospeech
+    #A credential is also needed to be downloaded and then activated using 
+export GOOGLE_APPLICATION_CREDENTIALS="-----file path------.json"
+
+
+#Pytorch
+pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+#Huggingface Transformers
+pip install transformers
+
+#Punctuator
+pip install punctuator
+mkdir -p ~/.punctuator
+cd ~/.punctuator
+gdown https://drive.google.com/uc?id=0B7BsN5f2F1fZd1Q0aXlrUDhDbnM
+
+
+
+###########################################
+finally to run the program run
+Make sure the following files are in the same folder
+google_nlp.py
+questions.py
+inference_text_to_text.py
+
+# finally to run, execute,
+python inference_text_to_text.py
