@@ -194,30 +194,7 @@ def get_emotion(text):
 	return emotion
 
 def get_input_text():
-	silence_count = 0
-	in_text = record_and_transcribe(time_to_speak)
-	if('deep learning' in in_text):
-		return 'exit program'
-	while(len(in_text) < 10):
-		silence_count += 1
-		if(silence_count<3):
-			prompt = prompt_list[random.randint(0, len(prompt_list)-1)]
-			instruction = instruction_list[random.randint(0, len(instruction_list)-1)]
-			pavilion_emotion = 'idle'
-			t2s.text_to_voice(prompt, instruction, pavilion_emotion)
-			in_text = record_and_transcribe(time_to_speak)
-			if('deep learning' in in_text):
-				return 'exit program'
-		elif(silence_count>20):
-			silence_count = 0
-			in_text = record_and_transcribe(time_to_speak)
-			if('deep learning' in in_text):
-				return 'exit program'
-		else:
-			in_text = record_and_transcribe(time_to_speak)
-			if('deep learning' in in_text):
-				return 'exit program'
-	return in_text
+	return input()
 
 model = BartForConditionalGeneration.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
 tokenizer = BartTokenizer.from_pretrained('/home/tharindu/Desktop/black/codes/Black/Dragon_Project/poem_generation/BART_new/output/best')
@@ -267,7 +244,7 @@ while(True):
 	print("***************************************************************************************************")
 	print('Emotion =  ', pavilion_emotion)
 
-	t2s.text_to_voice(final_output, question, pavilion_emotion)
+	# t2s.text_to_voice(final_output, question, pavilion_emotion)
 
 	
 	#yesterday was quite hectic. never had a chance to get a good sleep
