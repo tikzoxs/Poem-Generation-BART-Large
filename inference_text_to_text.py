@@ -29,15 +29,15 @@ input_entities  = []
 good_words = ['them', 'hang', 'need', 'new', 'above', 'hang', 'floor', 'wait', 'audience', 'out', 'becauase', 'seem', 'meet', 'heart',
  'curiuos', 'play', 'people', 'tell', 'hear', 'surprise', 'element', 'keep', 'moemory', 'memories', 'thing', 'different',
   'courage', 'there', 'tales', 'many', 'happen', 'trust', 'unknown', 'situation', 'day', 'put',
-  'day', 'gone', 'darkness', 'darkness', 'fall', 'children', 'hard', 'blossom', 'world', 'protect', 'thorn', 'outside', 'harsh', 'spikey','retreat', 
+  'day', 'gone', 'darkness', 'darkness', 'fall', 'children', 'hard', 'blossom', 'world', 'protect', 'outside', 'harsh', 
   'away', 'any', 'garden', 'secret', 'retaliation', 'home', 'attack', 'trigger', 'provication', 'beware', 'your', 'grow', 'flowers', 'you', 
   'watch', 'comfort', 'calm', 'embrace', 'words', 'offer', 'wonderful', 'around', 'feels', 'warm', 'roses', 'shelter', 'silk', 'take', 'mighty', 'flow', 
   'us', 'butterflies', 'soft', 'let', 'heaven', 'shining', 'summer', 'wonder', 'expression', 'flutter', 'their', 'glittering', 'like', 'full', 
   'weightless', 'morning', 'hope', 'jump', 'bubbles', 'energy', 'run', 'tale', 'explore', 'spark', 'dance', 'fly', 'wings', 'filed', 'sparks', 'fileds', 
   'adventure', 'excited', 'rainbow', 'together', 'side', 'endless', 'have', 'along']
 
-emotion_list = [['cautious', 'peace', 'neutral', 'calm', ], ['happy', 'joy', 'happiness', 'over the moon'], 
-['anger', 'angry', 'hate', 'lonely', 'sad', 'pain', 'woe', 'sorrow', 'fear'], ['care', 'love', 'affection']]
+emotion_list = [['peace', 'neutral', 'calm', 'relax'], ['happy', 'joy', 'happiness', 'over the moon'], 
+['anger', 'angry', 'hate', 'lonely', 'sad', 'fear', 'negativity', 'unkind', 'brutal'], ['care', 'love', 'affection', 'kind', 'compassion']]
 embeddings_dict = {}
 
 sentiments_list = ['POSITIVE', 'NEGATIVE', 'NEUTRAL']
@@ -130,7 +130,7 @@ def process_input(in_text):
 	good_words_list = list(itemgetter(*good_index_list)(good_words))
 	print(good_words_list)
 	final_words = final_words + good_words_list
-	emotional_relevance = random.randint(0,1)
+	emotional_relevance = 1 #random.randint(0,1)
 	if(emotional_relevance == 1):
 		print("----------------Emotionally Relevant---------------------")
 		emotion = emotion_dict[get_emotion(in_text)]
