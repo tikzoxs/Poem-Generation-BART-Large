@@ -22,7 +22,7 @@ character_punctuation_ratio = 40
 time_to_speak = 15
 
 # word_embeddings_file = '/home/tharindu/Desktop/black/codes/Black/Dragon_Project/word_embedding/glove.6B/glove.6B.' + str(glove_embedding_dimensions) + 'd.txt'
-input_entities  = []
+# input_entities  = []
 
 # good_words_old = ['trees', 'love', 'flower', 'house', 'world', 'peace', 'mind', 'hero', 'beaches', 'beach', 'picture', 'victim', 'person', 'happy', 'angry', 'lake', 'grave', 'life', 'death', 'children', 'sweet', 'lane', 'nice', 'sorrow', 'exicted', 'forest', 'road']
 # good_words = ['happy', 'love', 'lane', 'unsure', 'anger', 'angry', 'happiness', 'joy', 'caring', 'care', 'loving']
@@ -54,8 +54,7 @@ instruction_list = ["Please speak up.", "tell me something.", "talk louder", "sp
 # 			coefs = np.fromstring(coefs, "f", sep=" ")
 # 			embeddings_dict[word] = coefs
 
-def syntax_analysis(text):
-	global input_entities
+def syntax_analysis(text,input_entities):
 	good_candidate_words_for_question = []
 	okay_noun_candidate_words_for_question = []
 	okay_verb_candidate_words_for_question = []
@@ -112,7 +111,7 @@ def generate_question(candidates, emotion):
 	return question
 
 def process_input(in_text):
-	global input_entities
+	input_entities = []
 	total_length = len(in_text)
 	entity_words = list(analyze_entities(in_text))
 	input_entities = entity_words.copy()
@@ -142,7 +141,7 @@ def process_input(in_text):
 	random.shuffle(final_words)
 	processed_in_text = ' '.join(final_words)
 	print(processed_in_text)
-	return processed_in_text
+	return processed_in_text, input_entities
 
 def fix_incomplete_sentences(out_text):
 	if(len(re.findall(r'[.]', out_text)) > 0):
@@ -211,7 +210,7 @@ while(True):
 	in_text = get_input_text()
 	if(in_text == 'exit program'):
 		break
-	ARTICLE_TO_SUMMARIZE = process_input(in_text)
+	ARTICLE_TO_SUMMARIZE, input_entities = process_input(in_text)
 	inputs = tokenizer([ARTICLE_TO_SUMMARIZE], return_tensors='pt')
 
 	# Generate Summary
@@ -234,7 +233,7 @@ while(True):
 	# send_messege(bytes(pavilion_emotion, 'utf-8')) 
 	# comm(pavilion_emotion)
 
-	candidates = syntax_analysis(in_text)
+	candidates = syntax_analysis(in_text, input_entities)
 	question = generate_question(candidates,pavilion_emotion)
 	print("\n\n***************************************************************************************************")
 	print("Person: ", in_text)
